@@ -1,0 +1,127 @@
+import { version } from '../package.json';
+
+const config = {
+	uid: 'xxxxxxx-xxxxxxxxxx',
+	url: '',
+	eventTime: new Date().getTime(), // 埋点时间戳
+	localTime: new Date().toLocaleString(), //用户本地时间
+	deviceType: 'ios', // 用户设备
+	deviceId: 'xxxxxxxxxxxxxxxx', // 设备 ID
+	osType: 'Android', //  系统类型
+	osVersion: '', //  系统版本
+	appVersion: '', // 当前应用版本
+	appID: '', // 当前应用 ID,
+	extra: '' // 自定义扩展信息
+};
+
+interface queryData {
+    projectId?: string;
+    event?: string;
+    performanceInfo?: PerformanceEntry;
+    message?: string;
+    stack?: string;
+}
+
+interface msgData {
+
+}
+
+class IllusionSDK {
+	projectId: string;
+
+	constructor (projectId: string) {
+		this.projectId = projectId;
+	}
+
+	_URL () {
+		return window.location.origin + window.location.pathname;
+	}
+
+	version () {
+		return version;
+	}
+
+	// 常用是通过请求 img/scritp资源来避免跨域
+	serd (url: string, query: queryData = {}) {
+		query.projectId = this.projectId;
+		const querystr = Object.entries(query).map(([key, value]) => `${key}-${value}`).join('&');
+		const img = new Image();
+		img.src = `${url}?${querystr}`;
+		console.log(img);
+	}
+
+	// WebAPI 新特 用于替代快要丢弃的 performance.timing
+	sendBeacon (url: string, data: queryData = {}) {
+		data.projectId = data.projectId;
+		const datastr = Object.entries(data).map(([key, value]) => `${key}-${value}`).join('&');
+		return navigator.sendBeacon(url, datastr);
+	}
+
+	event (key: string, val: queryData = {}) {
+		const eventURL = this._URL();
+		this.serd(eventURL, { event: key, ...val });
+	}
+
+	// 页面的访问量
+	pv () {
+		this.event('pv');
+	}
+
+	// 用户的访问量
+	uv () {
+		this.event('uv');
+	}
+
+	//  页面停留时间
+	pageStay () {
+		this.event('pageStay');
+	}
+	// 交互事件（点击，长按）
+	// 逻辑事件（登录、跳转）
+
+	// TODO:
+	// 页面首次渲染时间：FP(firstPaint)=domLoading-navigationStart
+	// DOM加载完成：DCL(DOMContentEventLoad)=domContentLoadedEventEnd-navigationStart
+	// 页面首次有内容渲染时间 FCP =domLoading-navigationStart
+	// 页面首次有效渲染时间 FMP >= FCP
+	// 最大内容渲染时间 LCP(Largest Contentful Paint)
+	// 图片、样式等外链资源加载完成：L(Load)=loadEventEnd-navigationStart
+	// 稳定性指标 CLS(Cumulative Layout Shift)
+	// 流畅性指标 FPS
+	// 总阻塞时间 TBT
+	// 页面完成可交互时间 TTI
+	// 页面加载阶段,用户首次交互操作的延时时间 FID
+	// 页面加载阶段,用户交互操作可能遇到的最大延时时间 MPFID
+	initPerformance () {
+		const performanceURL = this._URL();
+		// 新特性，用于取代 performance.timing
+		const [performanceInfo] = performance.getEntriesByType('navigation');
+		//this.serd(performanceURL, performanceInfo)
+	}
+
+	// TODO:
+	// InternalError: 内部错误，比如如递归爆栈;
+	// RangeError: 范围错误，比如new Array(-1);
+	// EvalError: 使用eval()时错误;
+	// ReferenceError: 引用错误，比如使用未定义变量;
+	// SyntaxError: 语法错误，比如var a = ;
+	// TypeError: 类型错误，比如[1,2].split('.');
+	// URIError:  给 encodeURI或 decodeURl()传递的参数无效，比如decodeURI('%2')
+	// Error: 上面7种错误的基类，通常是开发者抛出
+	error (err: Error, mes: msgData = {}) {
+		const errorURL = this._URL();
+		const { message, stack } = err;
+		this.serd(errorURL, { message, stack, ...mes });
+	}
+
+	initError () {
+		window.addEventListener('error', (event: ErrorEvent) => {
+			this.error(event.error);
+		});
+		window.addEventListener('unhandledrejection', event => {
+			this.error(new Error(event.reason), { type: 'unhandledrejection' });
+		});
+	}
+};
+
+export default IllusionSDK;
