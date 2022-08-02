@@ -1,25 +1,11 @@
 import { version } from '../package.json';
-
-const config = {
-	uid: 'xxxxxxx-xxxxxxxxxx',
-	url: '',
-	eventTime: new Date().getTime(), // 埋点时间戳
-	localTime: new Date().toLocaleString(), //用户本地时间
-	deviceType: 'ios', // 用户设备
-	deviceId: 'xxxxxxxxxxxxxxxx', // 设备 ID
-	osType: 'Android', //  系统类型
-	osVersion: '', //  系统版本
-	appVersion: '', // 当前应用版本
-	appID: '', // 当前应用 ID,
-	extra: '' // 自定义扩展信息
-};
-
+import { IConfigs } from '../interface/info';
 interface queryData {
-    projectId?: string;
-    event?: string;
-    performanceInfo?: PerformanceEntry;
-    message?: string;
-    stack?: string;
+	apikey?: string;
+	event?: string;
+	performanceInfo?: PerformanceEntry;
+	message?: string;
+	stack?: string;
 }
 
 interface msgData {
@@ -27,10 +13,10 @@ interface msgData {
 }
 
 class IllusionSDK {
-	projectId: string;
+	config: IConfigs | undefined;
 
-	constructor (projectId: string) {
-		this.projectId = projectId;
+	constructor (config: IConfigs) {
+		this.config = config;
 	}
 
 	_URL () {
@@ -43,7 +29,7 @@ class IllusionSDK {
 
 	// 常用是通过请求 img/scritp资源来避免跨域
 	serd (url: string, query: queryData = {}) {
-		query.projectId = this.projectId;
+		query.apikey = this.config?.apikey;
 		const querystr = Object.entries(query).map(([key, value]) => `${key}-${value}`).join('&');
 		const img = new Image();
 		img.src = `${url}?${querystr}`;
@@ -52,7 +38,7 @@ class IllusionSDK {
 
 	// WebAPI 新特 用于替代快要丢弃的 performance.timing
 	sendBeacon (url: string, data: queryData = {}) {
-		data.projectId = data.projectId;
+		data.apikey = this.config?.apikey;
 		const datastr = Object.entries(data).map(([key, value]) => `${key}-${value}`).join('&');
 		return navigator.sendBeacon(url, datastr);
 	}

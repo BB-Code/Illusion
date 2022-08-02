@@ -21,3 +21,8 @@ export enum Methods{
     'PUT',
     'DELETE'
 }
+export enum Environment{
+    'development',
+    'production',
+    'test'
+}

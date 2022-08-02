@@ -1,5 +1,32 @@
-import { ErrorType, Methods, Operator } from './enum';
+import { ErrorType, Methods, Operator, Environment } from './enum';
 
+interface IUser {
+    name: string;
+    email: string;
+}
+interface ICallback {
+    callback: Function;
+}
+export interface IConfigs {
+    apikey: string;
+    appversion?: string;
+    env?: Environment;
+    user?: IUser;
+    metaData?: object;
+    callback?: ICallback;
+    setHttpBody?: boolean;
+    httpTimeout?: number;
+    filters?: object[];
+    isDev?: boolean;
+    isResource?: boolean;
+    isHttp?: boolean;
+    isWebsocket?: boolean;
+    isConsole?: boolean;
+    isPerformance?: boolean;
+    sampleRate?: number;
+    domain?: string;
+    sensitive?: Array<string>;
+}
 export interface IIPInfo {
     IP: string;
     address: string;
