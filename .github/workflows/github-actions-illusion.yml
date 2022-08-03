@@ -13,6 +13,6 @@ jobs:
         with:
           node-version: 16.x
       - run: echo "🛠 start to install packages for the ${{ github.repository }}."
-      - run: npm install
+      - run: npm run install
       - run: echo "📦 start to build packages for the ${{ github.repository }}."
-      - run: npm build
+      - run: npm run build
