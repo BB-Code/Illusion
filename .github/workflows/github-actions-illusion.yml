@@ -1,0 +1,18 @@
+name: GitHub Actions For Illusion
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🔎 ${{ github.repository }} be to checkout on ${{ github.ref }}."
+      - name: CheckOut Repository Code
+        uses: actions/checkout@v3
+      - run: echo "🧲 ${{ github.repository }} has been cloned."
+      - name: install packages
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - run: echo "🛠 start to install packages for the ${{ github.repository }}."
+      - run: npm install
+      - run: echo "📦 start to build packages for the ${{ github.repository }}."
+      - run: npm build
