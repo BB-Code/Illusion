@@ -14,9 +14,11 @@ interface msgData {
 
 class IllusionSDK {
 	config: IConfigs | undefined;
+	performanceInfo: PerformanceNavigationTiming;
 
 	constructor (config: IConfigs) {
 		this.config = config;
+		this.performanceInfo = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
 	}
 
 	_URL () {
@@ -50,7 +52,22 @@ class IllusionSDK {
 
 	// 页面的访问量
 	pv () {
-		this.event('pv');
+		const location = window.location;
+		let oldURL = location.href;
+		let oldPathName = location.pathname;
+		let i = 0;
+		setInterval(() => {
+			const newURL = location.href;
+			const newPathName = location.pathname;
+			console.log('🚀 ~ file: index.ts ~ line 61 ~ IllusionSDK ~ setInterval ~ oldPathName', oldPathName);
+			console.log('🚀 ~ file: index.ts ~ line 61 ~ IllusionSDK ~ setInterval ~ newPathName', newPathName);
+			if (newPathName !== oldPathName) {
+				oldURL = newURL;
+				oldPathName = newPathName;
+				i++;
+				this.event('pv', { event: `pv${i}` });
+			}
+		}, 1000);
 	}
 
 	// 用户的访问量
@@ -62,8 +79,17 @@ class IllusionSDK {
 	pageStay () {
 		this.event('pageStay');
 	}
+
 	// 交互事件（点击，长按）
 	// 逻辑事件（登录、跳转）
+	// 页面首次渲染时间
+	FP () {
+		return this.performanceInfo.domComplete - this.performanceInfo.connectStart + 'ms';
+	}
+
+	DCL () {
+		return this.performanceInfo.domContentLoadedEventEnd - this.performanceInfo.domContentLoadedEventStart + 'ms';
+	}
 
 	// TODO:
 	// 页面首次渲染时间：FP(firstPaint)=domLoading-navigationStart
@@ -82,7 +108,7 @@ class IllusionSDK {
 		const performanceURL = this._URL();
 		// 新特性，用于取代 performance.timing
 		const [performanceInfo] = performance.getEntriesByType('navigation');
-		//this.serd(performanceURL, performanceInfo)
+		this.serd(performanceURL, performanceInfo as queryData);
 	}
 
 	// TODO:
