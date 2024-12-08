@@ -6,7 +6,7 @@ jobs:
     steps:
       - run: echo "🔎 ${{ github.repository }} be to checkout on ${{ github.ref }}."
       - name: CheckOut Repository Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - run: echo "🧲 ${{ github.repository }} has been cloned."
       - name: install packages
         uses: actions/setup-node@v3
